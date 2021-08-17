@@ -1,17 +1,17 @@
-import React, { Component } from 'react';
+import React, { useContext, useEffect } from 'react';
 
 import Posts from './components/Posts';
 import Selector from './components/Selector';
 import { Context } from './components/RedditContext';
 
-class App extends Component {
-  componentDidMount() {
-    const { fetchPosts } = this.context;
-    fetchPosts();
-  }
+const App = () => {
+  const { fetchPosts, selectedSubreddit, postsBySubreddit, isFetching, refreshSubreddit  } = useContext(Context);
 
-  renderLastUpdatedAt() {
-    const { selectedSubreddit, postsBySubreddit } = this.context;
+  useEffect(() => {
+    fetchPosts();
+  })
+
+  const renderLastUpdatedAt = () => {
     const { lastUpdated } = postsBySubreddit[selectedSubreddit];
 
     if (!lastUpdated) return null;
@@ -23,9 +23,7 @@ class App extends Component {
     );
   }
 
-  renderRefreshButton() {
-    const { isFetching, refreshSubreddit } = this.context;
-
+  const renderRefreshButton = () => {
     if (isFetching) return null;
 
     return (
@@ -39,26 +37,20 @@ class App extends Component {
     );
   }
 
-  render() {
-    const { selectedSubreddit, postsBySubreddit, isFetching } = this.context;
-    const { items: posts = [] } = postsBySubreddit[selectedSubreddit];
-    const isEmpty = posts.length === 0;
-
-    return (
+  const { items: posts = [] } = postsBySubreddit[selectedSubreddit];
+  const isEmpty = posts.length === 0;
+  return (
+    <div>
+      <Selector />
       <div>
-        <Selector />
-        <div>
-          {this.renderLastUpdatedAt()}
-          {this.renderRefreshButton()}
-        </div>
-        {isFetching && <h2>Loading...</h2>}
-        {!isFetching && isEmpty && <h2>Empty.</h2>}
-        {!isFetching && !isEmpty && <Posts />}
+        {renderLastUpdatedAt()}
+        {renderRefreshButton()}
       </div>
-    );
-  }
+      {isFetching && <h2>Loading...</h2>}
+      {!isFetching && isEmpty && <h2>Empty.</h2>}
+      {!isFetching && !isEmpty && <Posts />}
+    </div>
+  );
 }
-
-App.contextType = Context;
 
 export default App;
